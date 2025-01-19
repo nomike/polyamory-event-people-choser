@@ -13,10 +13,9 @@ import json
 import random
 import yaml
 
-def choose_people_by_polycule(polycules, available_spots) -> List[str]:
+def admit_people(polycules, available_spots):
     remaining_spots = available_spots
     admitted_people = []
-    random.shuffle(polycules)
     for polycule in polycules:
         if(len(polycule) > remaining_spots):
             continue
@@ -24,32 +23,26 @@ def choose_people_by_polycule(polycules, available_spots) -> List[str]:
         remaining_spots -= len(polycule)
     return admitted_people
 
+def choose_people_by_polycule(polycules, available_spots) -> List[str]:
+    random.shuffle(polycules)
+    return admit_people(polycules, available_spots)
+
 def choose_people_by_polycule_average(polycules, available_spots):
+    remaining_spots = available_spots
+    admitted_people = []
     persons = flatten_polycules(polycules)
     random.shuffle(persons)
-    
-    # assign each person a rank
+
+    # assign arank to each person
     person_ranking = {person: i for i, person in enumerate(persons)}
+    polycule_rankings = []
 
-    # calculate the average rank of each polycule
-    polycule_rankings = {}
-    polycule_averages = {}
-    for person, rank in person_ranking.items():
-        polycule = "/".join(person.split('/')[0:1])
-        if polycule not in polycule_rankings:
-            polycule_rankings[polycule] = []
-        polycule_rankings[polycule].append(rank)
+    for polycule in polycules:
+        average_rank = sum(person_ranking[person] for person in polycule) / len(polycule)
+        polycule_rankings.append((average_rank, polycule))
 
-    for polycule, ranks in polycule_rankings.items():
-        polycule_averages[polycule] = sum(ranks)/len(ranks)
-    
-    # sort the persons by the average rank of their polycule
-    person_ranking = {person : polycule_averages["/".join(person.split('/')[0:1])] for person in person_ranking.keys()}
-
-    sorted_persons = sorted(person_ranking.items(), key=lambda x: x[1])
-
-    admitted_people = [person for person, rank in sorted_persons[:available_spots]]
-    return admitted_people
+    polycule_rankings = sorted(polycule_rankings)
+    return admit_people([polycule for _, polycule in polycule_rankings], available_spots)
 
 def generate_polycules(polycule_dataset: Dict[str, int]):
     polycules = []
