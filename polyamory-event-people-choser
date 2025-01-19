@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+
+"""
+Usage:
+    pan-people-chooser [options] <polycule-file> <available-spots>
+    pan-people-chooser (-h | --help)
+    pan-people-chooser --version
+"""
+
+
+from typing import Dict, List
+import json
+import random
+import yaml
+
+def choose_people_by_polycule(polycules, available_spots) -> List[str]:
+    remaining_spots = available_spots
+    admitted_people = []
+    random.shuffle(polycules)
+    for polycule in polycules:
+        if(len(polycule) > remaining_spots):
+            continue
+        admitted_people.extend(polycule)
+        remaining_spots -= len(polycule)
+    return admitted_people
+
+def choose_people_by_polycule_average(polycules, available_spots):
+    persons = flatten_polycules(polycules)
+    random.shuffle(persons)
+    
+    # assign each person a rank
+    person_ranking = {person: i for i, person in enumerate(persons)}
+
+    # calculate the average rank of each polycule
+    polycule_rankings = {}
+    polycule_averages = {}
+    for person, rank in person_ranking.items():
+        polycule = "/".join(person.split('/')[0:1])
+        if polycule not in polycule_rankings:
+            polycule_rankings[polycule] = []
+        polycule_rankings[polycule].append(rank)
+
+    for polycule, ranks in polycule_rankings.items():
+        polycule_averages[polycule] = sum(ranks)/len(ranks)
+    
+    # sort the persons by the average rank of their polycule
+    person_ranking = {person : polycule_averages["/".join(person.split('/')[0:1])] for person in person_ranking.keys()}
+
+    sorted_persons = sorted(person_ranking.items(), key=lambda x: x[1])
+
+    admitted_people = [person for person, rank in sorted_persons[:available_spots]]
+    return admitted_people
+
+def generate_polycules(polycule_dataset: Dict[str, int]):
+    polycules = []
+    for i, polycule_params in enumerate(polycule_dataset.items()):
+        size, count = polycule_params
+        for j in range(count):
+            polycules.append([f'{i+1}/{j+1}/{k+1}' for k in range(int(size))])
+    return polycules
+
+def flatten_polycules(polycules: List[List[str]]) -> List[str]:
+    return [person for polycule in polycules for person in polycule]
+
+def caculate_admission_propability(people, total_runs) -> Dict[str, float]:
+    return {person: count/total_runs for person, count in people.items()}
+
+def calculate_polycule_size_admission_propability(admission_propabilities) -> Dict[int, float]:
+    polycule_sizes = {}
+    for person, propability in admission_propabilities.items():
+        polycule_size = person.split('/')[0]
+        if polycule_size not in polycule_sizes:
+            polycule_sizes[polycule_size] = []
+        polycule_sizes[polycule_size].append(propability)
+    return {size: sum(propabilities)/len(propabilities) for size, propabilities in polycule_sizes.items()}
+
+if __name__ == '__main__':
+    with open('config.json') as f:
+        config = json.load(f)
+    
+    # statically seed the random number generator tpo have consistent results
+    random.seed("pan-people-chooser")
+    simulation_results = []
+    for available_spots in config['available_spots']: 
+        for polycule_dataset in config['polycule_datasets']:
+            for algorithm in [choose_people_by_polycule, choose_people_by_polycule_average]:
+
+                polycules = generate_polycules(config['polycule_datasets'][polycule_dataset])
+                admission_count = {person:0 for person in flatten_polycules(polycules)}
+                for i in range(config['runs_per_set']):
+                    # chosen_people = choose_people_by_polycule(polycules, available_spots)
+                    chosen_people = algorithm(polycules, available_spots)
+                    for person in chosen_people:
+                        admission_count[person] += 1
+
+                admission_propability = caculate_admission_propability(admission_count, config['runs_per_set'])
+                
+                simulation_result = {
+                    'available_spots': available_spots,
+                    'polycule_dataset': polycule_dataset,
+                    'algorithm': algorithm.__name__,
+                    'total_people': len(flatten_polycules(polycules)),
+                    'avarage_admission_propability': sum(admission_propability.values())/len(admission_propability),
+                    'min_admission_probability': min(admission_propability.values()),
+                    'max_admission_probability': max(admission_propability.values()),
+                    'polycule_size_admission_propability': calculate_polycule_size_admission_propability(admission_propability),
+                }
+
+                simulation_results.append(simulation_result)
+                
+                if config['output_format'] == 'text':
+                    print(f"Available spots: {simulation_result['available_spots']}")
+                    print(f"Polycule dataset: {simulation_result['polycule_dataset']}")
+                    print(f"Algorythm: {simulation_result['algorithm']}")
+                    print(f"Total people: {simulation_result['total_people']}")
+                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['avarage_admission_propability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
+                    print('Polycule size admission propability (avarage = 1.0):')
+                    for size, propability in simulation_result['polycule_size_admission_propability'].items():
+                        print(f'  {size}: {propability/simulation_result['avarage_admission_propability']:.2f}')
+                    print('---------------------------------')
+            if config['output_format'] == 'text':
+                print('---------------------------------')
+        if config['output_format'] == 'text':
+            print('---------------------------------')
+    if config['output_format'] == 'json':
+        print(json.dumps(simulation_results, indent=4))
+    elif config['output_format'] == 'yaml':
+        print(yaml.dump(simulation_results, default_flow_style=False))
+    elif config['output_format'] == 'text':
+        pass
+    else:
+        print('Invalid output format')
+        exit(1)
