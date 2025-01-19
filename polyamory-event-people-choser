@@ -100,7 +100,7 @@ if __name__ == '__main__':
                     'polycule_dataset': polycule_dataset,
                     'algorithm': algorithm.__name__,
                     'total_people': len(flatten_polycules(polycules)),
-                    'avarage_admission_propability': sum(admission_propability.values())/len(admission_propability),
+                    'average_admission_propability': sum(admission_propability.values())/len(admission_propability),
                     'min_admission_probability': min(admission_propability.values()),
                     'max_admission_probability': max(admission_propability.values()),
                     'polycule_size_admission_propability': calculate_polycule_size_admission_propability(admission_propability),
@@ -113,10 +113,10 @@ if __name__ == '__main__':
                     print(f"Polycule dataset: {simulation_result['polycule_dataset']}")
                     print(f"Algorythm: {simulation_result['algorithm']}")
                     print(f"Total people: {simulation_result['total_people']}")
-                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['avarage_admission_propability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
-                    print('Polycule size admission propability (avarage = 1.0):')
+                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['average_admission_propability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
+                    print('Polycule size admission propability (average = 1.0):')
                     for size, propability in simulation_result['polycule_size_admission_propability'].items():
-                        print(f'  {size}: {propability/simulation_result['avarage_admission_propability']:.2f}')
+                        print(f'  {size}: {propability/simulation_result['average_admission_propability']:.2f}')
                     print('---------------------------------')
             if config['output_format'] == 'text':
                 print('---------------------------------')
