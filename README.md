@@ -37,18 +37,14 @@ polycule sizes and the number of polycules of that size.
 e.g.:
 
 ```json
-{
-  "polycule_datasets": [
-    {
-      "1": 10,
-      "2": 5,
-      "3": 2
-    }
-  ]
-}
+"example": {
+    "1": 10,
+    "2": 5,
+    "3": 2
+},
 ```
 
-This would create 10 polycules of size 1, 5 polycules of size 2 and 2 polycules of size 3.
+This would create a seyt named "example" with 10 polycules of size 1, 5 polycules of size 2 and 2 polycules of size 3.
 
 ### `available_spots`
 
