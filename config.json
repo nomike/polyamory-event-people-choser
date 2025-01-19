@@ -40,6 +40,6 @@
         200,
         400
     ],
-    "runs_per_set": 100,
-    "output_format": "yaml"
+    "runs_per_set": 100000,
+    "output_format": "text"
 }
