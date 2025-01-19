@@ -25,7 +25,9 @@ people for the events. The results can then be compared to see which algorithm i
 
 ## Configuration
 
-Configuration is done via a `config.json` file, which contains the following sections:
+Create a copy of `config.json.example` and name it `config.json`.
+
+This file contains the following sections:
 
 ### `polycule_datasets`
 
