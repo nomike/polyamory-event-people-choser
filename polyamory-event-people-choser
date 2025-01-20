@@ -55,16 +55,16 @@ def generate_polycules(polycule_dataset: Dict[str, int]):
 def flatten_polycules(polycules: List[List[str]]) -> List[str]:
     return [person for polycule in polycules for person in polycule]
 
-def caculate_admission_propability(people, total_runs) -> Dict[str, float]:
+def caculate_admission_probability(people, total_runs) -> Dict[str, float]:
     return {person: count/total_runs for person, count in people.items()}
 
-def calculate_polycule_size_admission_propability(admission_propabilities) -> Dict[int, float]:
+def calculate_polycule_size_admission_probability(admission_propabilities) -> Dict[int, float]:
     polycule_sizes = {}
-    for person, propability in admission_propabilities.items():
+    for person, probability in admission_propabilities.items():
         polycule_size = person.split('/')[0]
         if polycule_size not in polycule_sizes:
             polycule_sizes[polycule_size] = []
-        polycule_sizes[polycule_size].append(propability)
+        polycule_sizes[polycule_size].append(probability)
     return {size: sum(propabilities)/len(propabilities) for size, propabilities in polycule_sizes.items()}
 
 if __name__ == '__main__':
@@ -86,17 +86,17 @@ if __name__ == '__main__':
                     for person in chosen_people:
                         admission_count[person] += 1
 
-                admission_propability = caculate_admission_propability(admission_count, config['runs_per_set'])
+                admission_probability = caculate_admission_probability(admission_count, config['runs_per_set'])
                 
                 simulation_result = {
                     'available_spots': available_spots,
                     'polycule_dataset': polycule_dataset,
                     'algorithm': algorithm.__name__,
                     'total_people': len(flatten_polycules(polycules)),
-                    'average_admission_propability': sum(admission_propability.values())/len(admission_propability),
-                    'min_admission_probability': min(admission_propability.values()),
-                    'max_admission_probability': max(admission_propability.values()),
-                    'polycule_size_admission_propability': calculate_polycule_size_admission_propability(admission_propability),
+                    'average_admission_probability': sum(admission_probability.values())/len(admission_probability),
+                    'min_admission_probability': min(admission_probability.values()),
+                    'max_admission_probability': max(admission_probability.values()),
+                    'polycule_size_admission_probability': calculate_polycule_size_admission_probability(admission_probability),
                 }
 
                 simulation_results.append(simulation_result)
@@ -106,10 +106,10 @@ if __name__ == '__main__':
                     print(f"Polycule dataset: {simulation_result['polycule_dataset']}")
                     print(f"Algorythm: {simulation_result['algorithm']}")
                     print(f"Total people: {simulation_result['total_people']}")
-                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['average_admission_propability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
-                    print('Polycule size admission propability (average = 1.0):')
-                    for size, propability in simulation_result['polycule_size_admission_propability'].items():
-                        print(f'  {size}: {propability/simulation_result['average_admission_propability']:.2f}')
+                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['average_admission_probability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
+                    print('Polycule size admission probability (average = 1.0):')
+                    for size, probability in simulation_result['polycule_size_admission_probability'].items():
+                        print(f'  {size}: {probability/simulation_result['average_admission_probability']:.2f}')
                     print('---------------------------------')
             if config['output_format'] == 'text':
                 print('---------------------------------')
