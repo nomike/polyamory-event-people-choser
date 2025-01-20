@@ -58,14 +58,14 @@ def flatten_polycules(polycules: List[List[str]]) -> List[str]:
 def caculate_admission_probability(people, total_runs) -> Dict[str, float]:
     return {person: count/total_runs for person, count in people.items()}
 
-def calculate_polycule_size_admission_probability(admission_propabilities) -> Dict[int, float]:
+def calculate_polycule_size_admission_probability(admission_probabilities) -> Dict[int, float]:
     polycule_sizes = {}
-    for person, probability in admission_propabilities.items():
+    for person, probability in admission_probabilities.items():
         polycule_size = person.split('/')[0]
         if polycule_size not in polycule_sizes:
             polycule_sizes[polycule_size] = []
         polycule_sizes[polycule_size].append(probability)
-    return {size: sum(propabilities)/len(propabilities) for size, propabilities in polycule_sizes.items()}
+    return {size: sum(probabilities)/len(probabilities) for size, probabilities in polycule_sizes.items()}
 
 if __name__ == '__main__':
     with open('config.json') as f:
@@ -104,9 +104,9 @@ if __name__ == '__main__':
                 if config['output_format'] == 'text':
                     print(f"Available spots: {simulation_result['available_spots']}")
                     print(f"Polycule dataset: {simulation_result['polycule_dataset']}")
-                    print(f"Algorythm: {simulation_result['algorithm']}")
+                    print(f"Algorithm: {simulation_result['algorithm']}")
                     print(f"Total people: {simulation_result['total_people']}")
-                    print(f'Admission propabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['average_admission_probability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
+                    print(f'Admission probabilities: min: {simulation_result['min_admission_probability']:.2f}, avg: {simulation_result['average_admission_probability']:.2f}, max: {simulation_result['max_admission_probability']:.2f}')
                     print('Polycule size admission probability (average = 1.0):')
                     for size, probability in simulation_result['polycule_size_admission_probability'].items():
                         print(f'  {size}: {probability/simulation_result['average_admission_probability']:.2f}')
